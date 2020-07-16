@@ -5,3 +5,7 @@
 - [ ] : amount를 private으로 만들기
 - [x] : Dollar 부작용?
 - [ ] : Money 반올림?
+- [x] : equals()
+- [ ] : hashCode()
+- [ ] : Equal null, null 값과 비교한다면
+- [ ] : Equal object, 다른 객체와 비교한다면
