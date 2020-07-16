@@ -18,6 +18,7 @@ describe("다중 통화를 지원하는 Money 객체", function () {
   });
 
   it("equals 메서드로 같은 양의 달러는 참이 되어야 한다.", function () {
+    // 동치성을 일반화 하자.
     expect(new Dollar(5).equals(new Dollar(5))).toBeTrue();
     // 삼각측량 : 예제가 2개 이상 있어야만 코드를 일반화 시킬 수 있다.
     expect(new Dollar(5).equals(new Dollar(6))).toBeFalse();
