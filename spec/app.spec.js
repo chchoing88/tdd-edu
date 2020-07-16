@@ -42,3 +42,10 @@ describe("Franc 객체", function () {
     expect(new Franc(5).equals(new Franc(6))).toBeFalse();
   });
 });
+
+describe("Money 객체", function () {
+  it("equals 메서드로 같은 양의 달러는 참이 되어야 한다.", function () {
+    // 같은 통화 화폐가 아니면 false 이어야 한다.
+    expect(new Franc(5).equals(new Dollar(5))).toBeFalse();
+  });
+});
