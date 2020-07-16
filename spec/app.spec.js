@@ -1,6 +1,7 @@
-const Dollar = require("../src/index");
+const Dollar = require("../src/Dollar");
+const Franc = require("../src/Franc");
 
-describe("다중 통화를 지원하는 Money 객체", function () {
+describe("Dollar 객체", function () {
   // it("Dollar 객체에 곱하기 기능을 둔다.", function () {
   //   const five = new Dollar(5);
   //   five.times(2);
@@ -16,7 +17,6 @@ describe("다중 통화를 지원하는 Money 객체", function () {
     // Dollar.times() 연산의 호출이 곱한 값을 갖는 Dollar를 반환한다는 것을 정확히 말해주지 않는다.
     // expect(product.amount).toBe(10);
     expect(new Dollar(10)).toEqual(five.times(2));
-    product = five.times(3);
     // expect(product.amount).toBe(15);
     expect(new Dollar(15)).toEqual(five.times(3));
   });
@@ -26,5 +26,14 @@ describe("다중 통화를 지원하는 Money 객체", function () {
     expect(new Dollar(5).equals(new Dollar(5))).toBeTrue();
     // 삼각측량 : 예제가 2개 이상 있어야만 코드를 일반화 시킬 수 있다.
     expect(new Dollar(5).equals(new Dollar(6))).toBeFalse();
+  });
+});
+
+describe("Franc 객체", function () {
+  it("times 메서드로 Franc 객체에 곱하기 기능을 둔다.", function () {
+    const five = new Franc(5);
+
+    expect(new Franc(10)).toEqual(five.times(2));
+    expect(new Franc(15)).toEqual(five.times(3));
   });
 });

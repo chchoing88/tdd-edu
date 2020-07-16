@@ -9,3 +9,7 @@
 - [ ] : hashCode()
 - [ ] : Equal null, null 값과 비교한다면
 - [ ] : Equal object, 다른 객체와 비교한다면
+- [x] : 5CHF x 2 = 10CHF
+- [ ] : Dollar/Franc 중복
+- [ ] : 공용 equals
+- [ ] : 공용 times
