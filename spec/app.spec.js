@@ -1,5 +1,6 @@
 const Dollar = require("../src/Dollar");
 const Franc = require("../src/Franc");
+const Money = require("../src/Money");
 
 describe("Dollar 객체", function () {
   // it("Dollar 객체에 곱하기 기능을 둔다.", function () {
@@ -10,7 +11,9 @@ describe("Dollar 객체", function () {
   // });
 
   it("times 메서드로 Dollar 객체에 곱하기 기능을 둔다.", function () {
-    const five = new Dollar(5);
+    //
+    // const five = new Dollar(5);
+    const five = Money.dallor(5);
     // 삼각측량을 이용했다면 테스트를 통과시키기 위한 상수값 설정으로는 통과시키기 어려웠을 것이다.
     // let product = five.times(2);
     // Dollar의 amount 인스턴스 변수를 사용하는 코드를 Dollar 자신만 쓰게 만들어서 private로 만들자.
