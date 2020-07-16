@@ -11,10 +11,14 @@ describe("다중 통화를 지원하는 Money 객체", function () {
   it("times 메서드로 Dollar 객체에 곱하기 기능을 둔다.", function () {
     const five = new Dollar(5);
     // 삼각측량을 이용했다면 테스트를 통과시키기 위한 상수값 설정으로는 통과시키기 어려웠을 것이다.
-    let product = five.times(2);
-    expect(product.amount).toBe(10);
+    // let product = five.times(2);
+    // Dollar의 amount 인스턴스 변수를 사용하는 코드를 Dollar 자신만 쓰게 만들어서 private로 만들자.
+    // Dollar.times() 연산의 호출이 곱한 값을 갖는 Dollar를 반환한다는 것을 정확히 말해주지 않는다.
+    // expect(product.amount).toBe(10);
+    expect(new Dollar(10)).toEqual(five.times(2));
     product = five.times(3);
-    expect(product.amount).toBe(15);
+    // expect(product.amount).toBe(15);
+    expect(new Dollar(15)).toEqual(five.times(3));
   });
 
   it("equals 메서드로 같은 양의 달러는 참이 되어야 한다.", function () {
