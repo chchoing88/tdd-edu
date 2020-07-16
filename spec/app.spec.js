@@ -36,4 +36,9 @@ describe("Franc 객체", function () {
     expect(new Franc(10)).toEqual(five.times(2));
     expect(new Franc(15)).toEqual(five.times(3));
   });
+
+  it("equals 메서드로 같은 양의 달러는 참이 되어야 한다.", function () {
+    expect(new Franc(5).equals(new Franc(5))).toBeTrue();
+    expect(new Franc(5).equals(new Franc(6))).toBeFalse();
+  });
 });

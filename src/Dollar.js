@@ -1,14 +1,12 @@
-class Dollar {
+const Money = require("./Money");
+
+class Dollar extends Money {
   constructor(amount) {
-    this.amount = amount || 0;
+    super(amount);
   }
 
   times(multiplier) {
-    return new Dollar(this.amount * multiplier);
-  }
-
-  equals(objDollar) {
-    return this.amount === objDollar.amount;
+    return new Dollar(this._amount * multiplier);
   }
 }
 
