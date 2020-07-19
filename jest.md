@@ -454,53 +454,325 @@ class MyCustomReporter {
 
 ### resetMocks [boolean]
 
+Default: false
+
+매 테스트 전에 mock 상태를 자동으로 재설정 합니다. 각 테스트 전에 `jest.resetAllMocks()` 를 호출하는 것과 같습니다. 이것은 가짜 구현이 제거 된 모의를 갖지만 초기 구현은 복원하지 않습니다.
+
 ### resetModules [boolean]
+
+Default: false
+
+기본적으로 각 테스트 파일에는 자체 독립 모듈 레지스트리가 있습니다. resetModule을 활성화하면 개별 테스트를 실행하기 전에 한 단계 더 나아가 모듈 레지스트리를 재설정합니다. 이는 로컬 모듈 상태가 테스트간에 충돌하지 않도록 모든 테스트에 대해 모듈을 분리하는 데 유용합니다. `jest.resetModules()`를 사용하여 프로그래밍 방식으로 수행 할 수 있습니다.
 
 ### resolver [string]
 
+Default: undefined
+
+이 옵션은 사용자 정의 resolver를 지정할 수 있습니다. 이 resolver는 함수로 노출되는 node 모듈이어야 하고, 첫번째 인자로는 resolve 하기 위한 path 와 두번쨰 인자로는 다음 구조를 지닌 객체를 인자로 받습니다.
+
+```javascript
+{
+  "basedir": string,
+  "browser": bool,
+  "defaultResolver": "function(request, options)",
+  "extensions": [string],
+  "moduleDirectory": [string],
+  "paths": [string],
+  "rootDir": [string]
+}
+```
+
+이 함수는 해결해야 할 모듈의 경로를 반환하거나 모듈을 찾을 수 없으면 오류를 발생시켜야합니다.
+
 ### restoreMocks [boolean]
+
+Default: false
+
+매 테스트 전에 모의 상태를 자동으로 복원합니다. 각 테스트 전에 `jest.restoreAllMocks()` 를 호출하는 것과 같습니다. 이것은 가짜 구현을 제거하고 초기 구현을 복원하는 모의로 이어질 것입니다.
 
 ### rootDir [string]
 
+Default: Jest의 config 파일이나 package.json 또는 package.json이 없다면 pwd 명령어로 실행되었을때 결과를 root 디렉토리로 설정합니다.
+
+Jest가 테스트 및 모듈 내에서 스캔해야하는 루트 디렉토리. Jest 설정을 package.json 안에 넣고 루트 디렉토리를 리포지토리의 루트로 설정하려는 경우이 구성 매개 변수의 값은 기본적으로 package.json의 디렉토리입니다.
+
 ### roots [array<string>]
+
+Default: ["<rootDir>"]
+
+Jest가 파일을 검색 할 때 사용해야하는 디렉토리의 경로 목록입니다.
 
 ### runner [string]
 
+Default: "jest-runner"
+
+이 옵션은 Jest의 기본 test runner를 대신해서 사용하고자 할때 이용합니다. 다음과 같은 러너들이 있습니다.
+
+- [jest-runner-eslint](https://github.com/jest-community/jest-runner-eslint)
+- [jest-runner-mocha](https://github.com/rogeliog/jest-runner-mocha)
+- [jest-runner-tsc](https://github.com/azz/jest-runner-tsc)
+- [jest-runner-prettier](https://github.com/keplersj/jest-runner-prettier)
+
+test-runner 를 작성하기 위해서 생성자에 `globalConfig` 를 받는 class가 노출되어야 합니다. 그리고 `runTests` 메서드가 있어야 합니다.
+
+```javascript
+async runTests(
+  tests: Array<Test>,
+  watcher: TestWatcher,
+  onStart: OnTestStart,
+  onResult: OnTestSuccess,
+  onFailure: OnTestFailure,
+  options: TestRunnerOptions,
+): Promise<void>
+```
+
+테스트 실행기가 직렬로만 실행되는 대신 병렬로 실행되도록 제한해야하는 경우 클래스 isSerial 속성을 true로 설정해야합니다.
+
 ### setupFiles [array]
+
+Default: []
+
+테스트 환경을 구성하거나 설정하기 위해 일부 코드를 실행하는 모듈의 경로 목록입니다. 각 setupFile은 테스트 파일 당 한 번씩 실행됩니다. 모든 테스트는 자체 환경에서 실행되므로 이러한 스크립트는 테스트 코드 자체를 실행하기 직전에 테스트 환경에서 실행됩니다.
+
+`setupFiles`가 `setupFilesAfterEnv` 전에 실행된다는 점도 주목할 가치가 있습니다.
 
 ### setupFilesAfterEnv [array]
 
+Default: []
+
+각 테스트 전에 테스트 프레임 워크를 구성하거나 설정하기 위해 일부 코드를 실행하는 모듈에 대한 경로 목록입니다. `setupFiles`는 환경에 테스트 프레임 워크가 설치되기 전에 실행되므로 이 ​​스크립트 파일은 환경에 테스트 프레임 워크가 설치된 직후에 일부 코드를 실행할 수있는 기회를 제공합니다.
+
+예를 들어, Jest는 jasmine API를 monkey-patching 하여 작동하는 여러 플러그인을 jasmine에 제공합니다. 더 많은 재스민 플러그인을 믹스에 추가하고 싶거나 (예를 들어, 프로젝트 전체의 사용자 정의 매칭기를 원한다면)이 모듈에서 그렇게 할 수 있습니다.
+
+```javascript
+module.exports = {
+  setupFilesAfterEnv: ["./jest.setup.js"],
+};
+```
+
+```javascript
+// jest.setup.js
+jest.setTimeout(10000); // in milliseconds
+```
+
 ### snapshotResolver [string]
+
+Default: undefined
+
+test <-> 스냅 샷 경로를 확인할 수 있는 모듈의 경로입니다. 이 구성 옵션을 사용하면 Jest가 디스크에서 스냅 샷 파일을 저장하는 위치를 사용자 정의 할 수 있습니다.
+
+다음은 스냅샷 resolver 모듈 예제 입니다.
+
+```javascript
+module.exports = {
+  // resolves from test to snapshot path
+  resolveSnapshotPath: (testPath, snapshotExtension) =>
+    testPath.replace("__tests__", "__snapshots__") + snapshotExtension,
+
+  // resolves from snapshot to test path
+  resolveTestPath: (snapshotFilePath, snapshotExtension) =>
+    snapshotFilePath
+      .replace("__snapshots__", "__tests__")
+      .slice(0, -snapshotExtension.length),
+
+  // Example test path, used for preflight consistency check of the implementation above
+  testPathForConsistencyCheck: "some/__tests__/example.test.js",
+};
+```
 
 ### snapshotSerializers [array<string>]
 
+Default: []
+
+Jest가 스냅 샷 테스트에 사용해야하는 스냅 샷 직렬 변환기 모듈의 경로 목록입니다.
+
+Jest에는 기본 제공 JavaScript 유형, HTML 요소 (Jest 20.0.0+), ImmutableJS (Jest 20.0.0+) 및 React 요소에 대한 기본 직렬 변환기가 있습니다.
+
 ### testEnvironment [string]
+
+Default: "jsdom"
+
+테스트에 사용될 테스트 환경. Jest의 기본 환경은 jsdom을 통한 브라우저와 유사한 환경입니다. 노드 서비스를 빌드하는 경우 node 옵션을 사용하여 대신 노드와 유사한 환경을 사용할 수 있습니다.
+
+파일 맨 위에 `@jest-environment` docblock을 추가하여 해당 파일의 모든 테스트에 사용할 다른 환경을 지정할 수 있습니다.
+
+```javascript
+/**
+ * @jest-environment jsdom
+ */
+
+test("use jsdom in this test file", () => {
+  const element = document.createElement("div");
+  expect(element).not.toBeNull();
+});
+```
 
 ### testEnvironmentOptions [Object]
 
+Default: {}
+
+testEnvironment에 전달 될 테스트 환경 옵션. 관련 옵션은 환경에 따라 다릅니다. 예를 들어 `{userAgent : "Agent/007"}`과 같이 jsdom에 제공된 옵션을 무시할 수 있습니다.
+
 ### testMatch [array<string>]
+
+(default: `[ "**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)" ]`)
+
+Jest가 테스트 파일을 탐지하기 위해 사용하는 glob 패턴. 기본적으로 `__tests__` 폴더 내의 .js, .jsx, .ts 및 .tsx 파일과 접미사가 .test 또는 .spec 인 파일 (예 : Component.test.js 또는 Component.spec.js)을 찾습니다. test.js 또는 spec.js라는 파일도 찾을 수 있습니다.
 
 ### testPathIgnorePatterns [array<string>]
 
+Default: ["/node_modules/"]
+
+테스트를 실행하기 전에 모든 테스트 경로와 일치하는 정규 표현식 패턴 문자열의 배열입니다. 테스트 경로가 패턴 중 하나와 일치하면 건너 뜁니다.
+
 ### testRegex [string | array<string>]
+
+Default: `(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$`
+
+Jest가 테스트 파일을 탐지하는 데 사용하는 패턴입니다. 기본적으로 `__tests__` 폴더 내의 .js, .jsx, .ts 및 .tsx 파일과 접미사가 .test 또는 .spec 인 파일 (예 : Component.test.js 또는 Component.spec.js)을 찾습니다. . test.js 또는 spec.js라는 파일도 찾을 수 있습니다. testMatch [array <string>]도 참조하십시오. 그러나 두 옵션을 모두 지정할 수는 없습니다.
+
+다음은 기본 정규식의 시각화입니다.
+
+```
+├── __tests__
+│   └── component.spec.js # test
+│   └── anything # test
+├── package.json # not test
+├── foo.test.js # test
+├── bar.spec.jsx # test
+└── component.js # not test
+```
 
 ### testResultsProcessor [string]
 
+Default: undefined
+
+이 옵션을 사용하면 사용자 정의 결과 프로세서를 사용할 수 있습니다. 이 프로세서는 다음 구조의 오브젝트를 첫 번째 인수로 예상하는 함수를 내보내고 리턴하는 노드 모듈 이어야합니다.
+
+```javascript
+{
+  "success": bool,
+  "startTime": epoch,
+  "numTotalTestSuites": number,
+  "numPassedTestSuites": number,
+  "numFailedTestSuites": number,
+  "numRuntimeErrorTestSuites": number,
+  "numTotalTests": number,
+  "numPassedTests": number,
+  "numFailedTests": number,
+  "numPendingTests": number,
+  "numTodoTests": number,
+  "openHandles": Array<Error>,
+  "testResults": [{
+    "numFailingTests": number,
+    "numPassingTests": number,
+    "numPendingTests": number,
+    "testResults": [{
+      "title": string (message in it block),
+      "status": "failed" | "pending" | "passed",
+      "ancestorTitles": [string (message in describe blocks)],
+      "failureMessages": [string],
+      "numPassingAsserts": number,
+      "location": {
+        "column": number,
+        "line": number
+      }
+    },
+    ...
+    ],
+    "perfStats": {
+      "start": epoch,
+      "end": epoch
+    },
+    "testFilePath": absolute path to test file,
+    "coverage": {}
+  },
+  ...
+  ]
+}
+```
+
 ### testRunner [string]
+
+Default: jasmine2
+
+이 옵션을 사용하면 사용자 정의 테스트 러너를 사용할 수 있습니다. 기본값은 jasmine2입니다. 테스트 러너 구현에 대한 경로를 지정하여 사용자 정의 테스트 러너를 제공 할 수 있습니다.
+
+테스트 러너 모듈은 다음과 같은 함수가 되어야 합니다.
+
+```javascript
+function testRunner(
+  globalConfig: GlobalConfig,
+  config: ProjectConfig,
+  environment: Environment,
+  runtime: Runtime,
+  testPath: string,
+): Promise<TestResult>;
+```
 
 ### testSequencer [string]
 
+Default: @jest/test-sequencer
+
+이 옵션을 사용하면 Jest의 기본값 대신 사용자 지정 시퀀서를 사용할 수 있습니다. sort는 선택적으로 약속을 반환 할 수 있습니다.
+
+테스트 경로를 알파벳순으로 정렬하는 예제 입니다.
+
+```javascript
+const Sequencer = require("@jest/test-sequencer").default;
+
+class CustomSequencer extends Sequencer {
+  sort(tests) {
+    // Test structure information
+    // https://github.com/facebook/jest/blob/6b8b1404a1d9254e7d5d90a8934087a9c9899dab/packages/jest-runner/src/types.ts#L17-L21
+    const copyTests = Array.from(tests);
+    return copyTests.sort((testA, testB) => (testA.path > testB.path ? 1 : -1));
+  }
+}
+
+module.exports = CustomSequencer;
+```
+
 ### testTimeout [number]
+
+Default: 5000
+
+Default timeout of a test in milliseconds.
 
 ### testURL [string]
 
+Default: http://localhost
+
+이 옵션은 jsdom 환경의 URL을 설정합니다. location.href와 같은 속성에 반영됩니다.
+
 ### timers [string]
+
+Default: real
+
+이 값을 `fake`로 설정하면 `setTimeout`과 같은 기능에 가짜 타이머를 사용할 수 있습니다. 가짜 타이머는 코드 조각이 테스트에서 기다리기를 원하지 않는 긴 시간 초과를 설정할 때 유용합니다.
 
 ### transform [object<string, pathToTransformer | [pathToTransformer, object]>]
 
+Default: undefined
+
+정규 표현식 경로를 transformers 에 매핑하는 옵션입니다. transformer 는 소스 파일을 변환하기 위한 동기 기능을 제공하는 모듈입니다. 예를 들어, 모듈에서 아직 새로운 언어 기능을 사용하거나 노드에서 지원하지 않는 테스트를 사용하려는 경우, 향후 버전의 JavaScript를 현재 버전으로 컴파일하는 많은 컴파일러 중 하나를 플러그인 할 수 있습니다.
+
+`{filePattern : [ 'path-to-transformer', {options}]}`와 같은 transformer에 구성을 전달할 수 있습니다. 예를 들어, 기본이 아닌 동작에 대해 babel-jest를 구성하려면 `{ "\\.js$": ['babel-jest', {rootMode : "upward"}]}` 처럼 설정할 수 있습니다.
+
 ### transformIgnorePatterns [array<string>]
 
+Default: ["/node_modules/"]
+
+변환하기 전에 모든 소스 파일 경로와 일치하는 정규 표현식 패턴 문자열의 배열입니다. 테스트 경로가 패턴과 일치하면 변환되지 않습니다.
+
 ### unmockedModulePathPatterns [array<string>]
+
+Default: []
+
+모듈 로더가 자동으로 모의 객체를 반환하기 전 모든 모듈과 일치하는 정규표현식 문자열 배열입니다.
+모듈의 경로가 이 목록의 패턴과 일치하면 모듈 로더에 의해 자동으로 mock되지 않습니다.
+
+이는 거의 항상 거의 항상 구현 세부 사항으로 사용되는 (일반적으로 underscore/lo-dash, etc) 일부 '유틸리티' 모듈에 유용합니다. 일반적으로 이 목록을 최대한 작게 유지하고 개별 테스트에서 항상 명시적인 `jest.mock() / jest.unmock()` 호출을 사용하는 것이 가장 좋습니다. 테스트 당 다른 환경의 독자가 테스트를 실행할 환경에 대해 추론하기 위해 테스트 별로 설정 하는 것이 훨씬 쉽습니다.
 
 ### verbose [boolean]
 
@@ -509,6 +781,10 @@ Default: false
 실행 중에 각 개별 테스트를 보고 해야하는지 여부를 나타냅니다. 실행 후에도 모든 오류가 여전히 맨 아래에 표시됩니다. 테스트 파일이 하나만 있으면 기본값은 true입니다.
 
 ### watchPathIgnorePatterns [array<string>]
+
+Default: []
+
+감시 모드에서 테스트를 다시 실행하기 전에 모든 소스 파일 경로와 일치하는 RegExp 패턴 배열입니다. 파일 경로가 패턴 중 하나와 일치하면 업데이트 될 때 테스트 재실행이 트리거되지 않습니다.
 
 ### watchPlugins [array<string | [string, Object]>]
 
