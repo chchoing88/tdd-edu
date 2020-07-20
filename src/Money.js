@@ -1,6 +1,17 @@
+const Dollar = require("./Dollar");
+const Franc = require("./Franc");
+
 class Money {
   constructor(amount) {
     this._amount = amount || 0;
+  }
+
+  static dollar(amount) {
+    return new Dollar.Dollar(amount);
+  }
+
+  static franc(amount) {
+    return new Franc.Franc(amount);
   }
 
   equals(objMoney) {
@@ -11,6 +22,8 @@ class Money {
       this.constructor === objMoney.constructor
     );
   }
+
+  times(multiplier) {}
 }
 
-module.exports = Money;
+exports.Money = Money;

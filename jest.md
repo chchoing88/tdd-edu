@@ -1,8 +1,651 @@
 # Jest
 
-## Configuration
+페이스북에서 만든 테스트 프레임워크로 빠르게 설치하고, 테스트하기에 적합합니다.
 
-## Options
+## 특징
+
+- zero config: jest는 별다른 설치 없이, config 없이 대부분의 자바스크립트 프로젝트에 테스트를 할 수 있도록 초점이 맞춰져 있습니다.
+- snapshots: 규모가 큰 object 들도 쉽게 유지하고 추적할 수 있도록 테스트를 진행할 수 있습니다.
+- isolated: 테스트들은 각각 병렬로 돌아가면서 최고 성능을 자랑합니다.
+- great api: `it` 부터 `expect` 까지 Jest는 테스트를 위한 툴킷을 모두 가지고 있습니다. 또한 잘 정돈된 문서와 유지보수를 잘 진행하고 있습니다.
+- Node 환경에서 JSDom을 이용하여 테스트를 진행합니다.
+- 테스트 러너, 구조화, 단언, 테스트 더블 등의 기능을 모두 포함.
+
+## Babel setting
+
+```bash
+npm install --save-dev babel-jest @babel/core @babel/preset-env
+```
+
+프로젝트 루트에 babel.config.js을 생성하여 현재 노드 버전에 맞는 Babel을 설정하세요:
+
+```javascript
+// babel.config.js
+module.exports = {
+  presets: [
+    [
+      '@babel/preset-env',
+      {
+        targets: {
+          node: 'current',
+        },
+      },
+    ],
+  ],
+};
+```
+
+> Jest를 설치할 때 babel-jest는 자동으로 설치되고 프로젝트에 바벨 구성이 존재하는 경우 자동으로 파일을 변환합니다. 이 동작을 방지하기위해, 명시적으로 transform 구성 옵션을 재설정할 수 있습니다.
+
+## API
+
+### test.todo(name)
+
+`it.todo(name)` 으로도 쓰일 수 있는 것으로 테스트 할 계획이 있는 경우에 작성합니다.
+
+### describe()
+
+여러개의 test() 코드를 하나의 작업 단위로 묶어줍니다.
+
+### test()
+
+하나의 테스트 케이스를 의미하며 `it()` 과 같은 역할을 합니다.
+
+### expect()
+
+테스트 진행시 값이 특정 조건에 충족하는지 확인할 필요가 있는데 이때, expect는 다른 것들을 검증 할 수 있는 "매처"를 제공해줍니다.
+
+### toBe()
+
+원시 값 또는 객체의 참조 값을 비교합니다. `===` 보다 더 나은 `Object.is` 로 값을 비교합니다.
+
+### toMatch(regexp | string)
+
+실제 값이 기대하는 정규표현식 이나 문자열에 match 가 되는지를 확인합니다.
+
+```javascript
+describe('grapefruits are healthy', () => {
+  test('grapefruits are a fruit', () => {
+    expect('grapefruits').toMatch('fruit');
+  });
+});
+```
+
+### toThrow(error?)
+
+함수가 호출했을 때 throws 를 테스트 합니다.
+
+**반드시 코드를 함수로 감싸야 합니다. 그렇지 않으면 오류가 발생하지 않고 어설 션이 실패합니다.**
+
+```javascript
+test('throws on octopus', () => {
+  expect(() => {
+    drinkFlavor('octopus');
+  }).toThrow();
+});
+```
+
+선택사항으로 구체적인 에러가 던져지는지 테스트 할 수 있습니다.
+
+- 정규 표현식: 에러 메시지가 해당 패턴과 일치하는지 파악
+- 문자열: 에러 메세지에 해당 문자열이 포함되어있는지 파악
+- 에러 객체: 에러 매세지가 주어진 에러 메세지와 같은지 파악
+- 에러 클래스: 에러 객체가 해당 클래스의 인스턴스 인지 파악
+
+### mockFn.mock.calls
+
+모킹 함수의 호출 기록을 배열로 나타냅니다. 모든 호출에 사용되었던 매개변수를 포함하고 있습니다.
+
+아래 예제는 `f` 라는 함수가 두번 호출 되었으며, 첫번째 호출은 `f(arg1, arg2)` 두번쨰 호출은 `f(arg3, arg4)` 입니다.
+
+```javascript
+[
+  ['arg1', 'arg2'],
+  ['arg3', 'arg4'],
+];
+```
+
+### mockFn.mock.results
+
+모킹 함수의 호출 결과물을 배열에 포함해 둡니다. 배열에는 각각 `type` 프로퍼티와 `value` 프로퍼티를 지닌 객체를 요소로 가집니다.
+`type`은 다음과 같은 형식중 하나를 따릅니다.
+
+- `return`: 함수가 평범하게 리턴값을 가졌을때를 나타냅니다.
+- `throw`: 에러 값을 던졌을때를 나타냅니다.
+- `imcomplete`: 아직 호출이 완료가 되지 않았을 때를 나타냅니다. 이는 모의 함수 자체 또는 모의 함수에서 호출 한 결과를 테스트하는 경우 발생합니다.
+
+아래 예제는 `f` 라는 함수가 3번 호출된 결과입니다. 3번 호출 될 동안 `result1` 을 반환하고, 에러를 반환하고, `result2`를 반환한 경우 입니다.
+
+```javascript
+[
+  {
+    type: 'return',
+    value: 'result1',
+  },
+  {
+    type: 'throw',
+    value: {
+      /* Error instance */
+    },
+  },
+  {
+    type: 'return',
+    value: 'result2',
+  },
+];
+```
+
+### mockFn.mock.instances
+
+`new` 키워드를 가지고 모킹 함수를 호출하여 인스턴스화 된 모든 객체 인스턴스를 포함하는 배열입니다.
+
+```javascript
+const mockFn = jest.fn();
+
+const a = new mockFn();
+const b = new mockFn();
+
+mockFn.mock.instances[0] === a; // true
+mockFn.mock.instances[1] === b; // true
+```
+
+### mockFn.mockClear()
+
+`mockFn.mock.call` 과 `mockFn.mock.instances` 에 저장된 정보를 모두 초기화 시킵니다.
+
+### mockFn.mockReset()
+
+`mockClear()`의 모든 기능을 수행하고 뿐만 아니라 모든 모킹된 return 값과 구현문을 제거합니다.
+
+### jest.fn(implementation)
+
+사용하지 않은 새로운 `mock function`을 리턴합니다. 선택적으로 목킹의 구현부를 받습니다.
+
+```javascript
+const mockFn = jest.fn();
+mockFn();
+expect(mockFn).toHaveBeenCalled();
+
+// With a mock implementation:
+const returnsTrue = jest.fn(() => true);
+console.log(returnsTrue()); // true;
+```
+
+### jest.spyOn(object, methodName)
+
+`jest.fn`과 유사한 모의 함수를 작성하지만 `object[methodName]`에 대한 호출도 추적합니다. Jest 모의 함수를 반환합니다.
+만약 기존 함수를 오버라이트를 원한다면 다음과 같이 사용합니다. `jest.spyOn(object, methodName).mockImplementation(() => customImplementation)` or `object[methodName] = jest.fn(() => customImplementation);`
+
+### jest.mock(moduleName, factory, options)
+
+모듈을 required 하였을때 해당 모듈을 자동으로 모킹된 모듈 버젼으로 모킹합니다. `factory` 와 `options` 는 선택 옵션들입니다.
+
+```javascript
+// banana.js
+module.exports = () => 'banana';
+
+// __tests__/test.js
+jest.mock('../banana');
+
+const banana = require('../banana'); // banana will be explicitly mocked.
+
+banana(); // will return 'undefined' because the function is auto-mocked.
+```
+
+두번째 인자는 Jest의 자동 모킹 기술을 사용하는 대신에 구체적인 모듈 생성자로 사용할 수 있습니다.
+
+```javascript
+jest.mock('../moduleName', () => {
+  return jest.fn(() => 42);
+});
+
+// This runs the function specified as second argument to `jest.mock`.
+const moduleName = require('../moduleName');
+moduleName(); // Will return '42';
+```
+
+특히 `factory` 파라미터를 default export 함께 ES6 모듈로 사용한다면 `__esModule: true` 프로퍼티가 필요합니다.
+
+```javascript
+import moduleName, {foo} from '../moduleName';
+
+jest.mock('../moduleName', () => {
+  return {
+    __esModule: true,
+    default: jest.fn(() => 42),
+    foo: jest.fn(() => 43),
+  };
+});
+
+moduleName(); // Will return 42
+foo(); // Will return 43
+```
+
+### jest.doMock(moduleName, factory, options)
+
+`babel-jest`를 사용해서 `mock`을 사용하게 되면 자동으로 코드 블럭의 가장 최상단으로 호이스팅이 이뤄지게 됩니다. 이것을 방지하고 싶다면 해당 메서드를 사용하십시요.
+같은 파일안에서 모킹 모듈을 다르게 활용하고 싶다면 다음과 같이 작성하십쇼.
+
+```javascript
+beforeEach(() => {
+  jest.resetModules();
+});
+
+test('moduleName 1', () => {
+  jest.doMock('../moduleName', () => {
+    return jest.fn(() => 1);
+  });
+  const moduleName = require('../moduleName');
+  expect(moduleName()).toEqual(1);
+});
+
+test('moduleName 2', () => {
+  jest.doMock('../moduleName', () => {
+    return jest.fn(() => 2);
+  });
+  const moduleName = require('../moduleName');
+  expect(moduleName()).toEqual(2);
+});
+```
+
+`jest.doMock()` 과 함께 ES6 의 import 문을 사용하려면 다음 절체를 따라야 합니다.
+
+- `__esModule: true` 프로퍼티를 추가해야 합니다.
+- 다이나믹 `import()` 문을 사용합니다.
+- 마지막으로 다이나믹 import를 사용하기 위해 Babel을 이용하십쇼 그리고 [babel-plugin-dynamic-import-node](https://www.npmjs.com/package/babel-plugin-dynamic-import-node) 플러그인을 추가하고 바벨에 dynamic importing 설정을 활성화 시키십시오.
+
+```javascript
+beforeEach(() => {
+  jest.resetModules();
+});
+
+test('moduleName 1', () => {
+  jest.doMock('../moduleName', () => {
+    return {
+      __esModule: true,
+      default: 'default1',
+      foo: 'foo1',
+    };
+  });
+  return import('../moduleName').then(moduleName => {
+    expect(moduleName.default).toEqual('default1');
+    expect(moduleName.foo).toEqual('foo1');
+  });
+});
+
+test('moduleName 2', () => {
+  jest.doMock('../moduleName', () => {
+    return {
+      __esModule: true,
+      default: 'default2',
+      foo: 'foo2',
+    };
+  });
+  return import('../moduleName').then(moduleName => {
+    expect(moduleName.default).toEqual('default2');
+    expect(moduleName.foo).toEqual('foo2');
+  });
+});
+```
+
+### jest.useFakeTimers(implementation?: 'modern' | 'legacy')
+
+Jest에게 표준 타이머 기능의 가짜 버전을 사용하도록 지시합니다. (`setTimeout`, `setInterval`, `clearTimeout`, `clearInterval`, `nextTick`, `setImmediate`, 그리고 `clearImmediate`)
+
+만약에 인자로 `modern` 을 넘기면 [@sinonjs/fake-timers](https://github.com/sinonjs/fake-timers)를 Jest가 가지고 있는 fake timers 대신에 구현부로 사용하게 될 것입니다. 이것은 추가적인 `Date`와 같은 타이머를 제공합니다. Jest의 27 버전에서는 `modern`이 디폴트 값이 될 것입니다.
+
+```javascript
+// timerGame.js
+'use strict';
+
+function timerGame(callback) {
+  console.log('Ready....go!');
+  setTimeout(() => {
+    console.log("Time's up -- stop!");
+    callback && callback();
+  }, 1000);
+}
+
+module.exports = timerGame;
+```
+
+여기에서 jest.useFakeTimers();를 호출하여 페이크 타이머를 활성화 합니다. 이것은 setTimeout과 다른 타이머 함수를 모의 함수로 대체합니다.
+
+```javascript
+// __tests__/timerGame-test.js
+'use strict';
+
+jest.useFakeTimers();
+
+test('waits 1 second before ending the game', () => {
+  const timerGame = require('../timerGame');
+  timerGame();
+
+  expect(setTimeout).toHaveBeenCalledTimes(1);
+  expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 1000);
+});
+```
+
+### jest.useRealTimers()
+
+Jest에게 실제 버전의 표준 타이머 기능을 사용하도록 지시합니다. `jest.useFakeTimers();` 를 한번 사용하고 나서 다시 real timer를 사용하려고 할때, 꼭 이 메서드를 호출해 주어야 합니다.
+
+### jest.advanceTimersByTime(msToRun)
+
+매크로 작업 대기열 만 실행합니다 (즉, setTimeout () 또는 setInterval () 및 setImmediate ()에 의해 대기중인 모든 작업).
+이 API가 호출되면 모든 타이머는 msToRun 밀리 초 단위로 진행됩니다.
+
+```javascript
+it('calls the callback after 1 second via advanceTimersByTime', () => {
+  const timerGame = require('../timerGame');
+  const callback = jest.fn();
+
+  timerGame(callback);
+
+  // 이 시점에, 콜백은 아직 호출되지 않아야 합니다
+  expect(callback).not.toBeCalled();
+
+  // 모든 타이머가 실행될때까지 빨기감기
+  jest.advanceTimersByTime(1000);
+
+  // 이제 콜백이 호출 되어야 합니다!
+  expect(callback).toBeCalled();
+  expect(callback).toHaveBeenCalledTimes(1);
+});
+```
+
+### jest.runOnlyPendingTimers()
+
+현재 보류중인 매크로 작업 만 실행합니다 (즉, setTimeout() 또는 setInterval()에 의해 이 시점까지 대기 한 작업 만). 현재 보류중인 매크로 작업 중 하나라도 새 매크로 작업을 예약하면이 호출로 해당 새 작업이 실행되지 않습니다.
+
+이는 테스트중인 모듈이 콜백이 다른 setTimeout()을 재귀 적으로 예약하는 setTimeout()을 예약하는 시나리오와 같은 시나리오에 유용합니다 (예약이 절대 멈추지 않음을 의미).
+이 시나리오에서는 한 번에 한 단계 씩 시간을 앞 당길 수 있는 것이 좋습니다.
+
+```javascript
+// infiniteTimerGame.js
+'use strict';
+
+function infiniteTimerGame(callback) {
+  console.log('Ready....go!');
+
+  setTimeout(() => {
+    console.log("Time's up! 10 seconds before the next game starts...");
+    callback && callback();
+
+    // 10초 안에 다음 게임이 예정됩니다
+    setTimeout(() => {
+      infiniteTimerGame(callback);
+    }, 10000);
+  }, 1000);
+}
+
+module.exports = infiniteTimerGame;
+```
+
+```javascript
+// __tests__/infiniteTimerGame-test.js
+'use strict';
+
+jest.useFakeTimers();
+
+describe('infiniteTimerGame', () => {
+  test('schedules a 10-second timer after 1 second', () => {
+    const infiniteTimerGame = require('../infiniteTimerGame');
+    const callback = jest.fn();
+
+    infiniteTimerGame(callback);
+
+    // 이 시점에, 1초 안에 게임 종료 일정을 잡기 위한
+    // setTimeout에 대해 단일 호출이 있어야 합니다.
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 1000);
+
+    // 현재 대기 타이머만 빨리감아 고갈시킵니다
+    // (그 프로세스 동안 생성되는 새로운 타이머는 없습니다)
+    jest.runOnlyPendingTimers();
+
+    // 이 시점에, 1초 타이머가 콜백을 발생시켜야 합니다
+    expect(callback).toBeCalled();
+
+    // 그리고 10초 안에 게임을 시작할 수 있는 새로운 타이머가
+    // 생성되어야 합니다
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 10000);
+  });
+});
+```
+
+### expect.assertions(number)
+
+`expect.assertions(number)` 는 테스트 중에 특정 갯수의 어설 션이 호출되는지 확인합니다. 콜백의 어설 션이 실제로 호출되었는지 확인하기 위해 비동기 코드를 테스트 할 때 유용합니다.
+여기서 number는 해당 테스트의 어설 션 갯수를 넣어주면 됩니다.
+
+## Async Test
+
+### Promise
+
+코드가 프로미스를 사용하는 경우, 비동기 테스트를 처리하는 보다 간단한 방법이 있습니다. 테스트로부터 프로미스를 반환시키면, Jest는 그 프로미스가 리졸브 되기를 기다릴 겁니다. 프로미스가 거부되면 테스트는 자동으로 실패합니다.
+
+```javascript
+test('the data is peanut butter', () => {
+  return fetchData().then(data => {
+    expect(data).toBe('peanut butter');
+  });
+});
+```
+
+return 구문을 생략한다면, test는 fetchData() 가 resolve 되고 then() 이 콜백 함수를 호출하기 전에 종료 될것입니다.
+
+promise가 거절 될 것이 예상되는 경우에는 .catch 메서드를 사용하세요. 여기서 특정 어설 션이 호출 되는지를 확인하기 위해 `expect.assertion(number)`를 추가하면 실제로 어셜 션이 호출이 되었는지 확인 할 수 있습니다.
+
+```javascript
+test('the fetch fails with an error', () => {
+  expect.assertions(1);
+  return fetchData().catch(e => expect(e).toMatch('error'));
+});
+```
+
+### .resolves / .rejects
+
+expect 구문에 `.resolves` 매처를 사용할 수 있으며, Jest는 그 프로미스가 resolve 되기를 기다립니다. 만약에 promise가 거절되면 테스트는 실패할 것입니다.
+
+```javascript
+test('the data is peanut butter', () => {
+  return expect(fetchData()).resolves.toBe('peanut butter');
+});
+
+// or
+
+test('the fetch fails with an error', () => {
+  return expect(fetchData()).rejects.toMatch('error');
+});
+```
+
+### Async / Await
+
+비동기 테스트를 작성하기 위해, test에 전달된 함수 앞에 `async` 키워드를 사용할 수 있습니다.
+
+```javascript
+test("the data is peanut butter", async () => {
+  const data = await fetchData();
+  expect(data).toBe("peanut butter");
+});
+
+test("the fetch fails with an error", async () => {
+  expect.assertions(1);
+  try {
+    await fetchData();
+  } catch (e) {
+    expect(e).toMatch("error");
+  }
+});
+
+test("the data is peanut butter", async () => {
+  await expect(fetchData()).resolves.toBe("peanut butter");
+});
+
+test("the fetch fails with an error", async () => {
+  await expect(fetchData()).rejects.toThrow("error");
+});
+```
+
+## Snapshot Test
+
+스냅샷 테스트는 UI가 예상 밖으로 변경되지 않도록 하기 원하는 경우 매우 유용한 도구 입니다.
+
+모바일 앱에서 전형적인 스냅샷 테스트는 UI Component를 렌더링하고 snapshot을 만들고 테스트와 함께 저장되어있던 snapshot 파일을 참조해 비교합니다. 만약 두 snapshot이 매치가 안된다면 테스트는 실패한 것입니다. 의도치 않았던 변화였거나 새로 snapshot을 업데이트 해야할 경우가 되겠습니다.
+
+```javascript
+import React from 'react';
+import Link from '../Link.react';
+import renderer from 'react-test-renderer';
+
+it('renders correctly', () => {
+  const tree = renderer
+    .create(<Link page="http://www.facebook.com">Facebook</Link>)
+    .toJSON();
+  expect(tree).toMatchSnapshot();
+});
+```
+
+처음 수행된다면 다음과 같은 스냡샷 파일이 생성됩니다.
+
+```javascript
+exports[`renders correctly 1`] = `
+<a
+  className="normal"
+  href="http://www.facebook.com"
+  onMouseEnter={[Function]}
+  onMouseLeave={[Function]}
+>
+  Facebook
+</a>
+`;
+```
+
+`jest --updateSnapshot` 명령으로 실행하면 스냅샷을 재생성 하라고 요청 할 수 있습니다. 이것은 모든 실패 스냅샷 테스트에 대해 스냅샷 산출물을 재생성 할 것입니다.
+
+실패한 스냅샷은 watch 모드에서 대화식으로 업데이트 될 수도 있습니다.
+
+테스트 코드 상에서 인라인 스냅샷을 만들 수 도 있습니다.
+먼저, 인자가 없는 .toMatchInlineSnapshot()를 호출하는 테스트를 작성합니다.
+
+```javascript
+it('renders correctly', () => {
+  const tree = renderer
+    .create(<Link page="https://prettier.io">Prettier</Link>)
+    .toJSON();
+  expect(tree).toMatchInlineSnapshot();
+});
+```
+
+다음 Jest를 실행하면, tree가 평가되고, 스냅샷이 toMatchInlineSnapshot에 인자로 작성될 것입니다:
+
+```javascript
+it('renders correctly', () => {
+  const tree = renderer
+    .create(<Link page="https://prettier.io">Prettier</Link>)
+    .toJSON();
+  expect(tree).toMatchInlineSnapshot(`
+<a
+  className="normal"
+  href="https://prettier.io"
+  onMouseEnter={[Function]}
+  onMouseLeave={[Function]}
+>
+  Prettier
+</a>
+`);
+});
+```
+
+종종 스냅샷을 할때마다 새롭게 생성되는 필드가 있을 수 있습니다. 이 객체들을 스냅샷 하려고 하면, 실행 할 때마다 스냅샷이 강제로 실패하게 됩니다.
+따라서 다음과 같이 작성하면 도움이 됩니다.
+
+```javascript
+it('will check the matchers and pass', () => {
+  const user = {
+    createdAt: new Date(),
+    id: Math.floor(Math.random() * 20),
+    name: 'LeBron James',
+  };
+
+  expect(user).toMatchSnapshot({
+    createdAt: expect.any(Date),  // 비대칭 매처
+    id: expect.any(Number), // 비대칭 매처
+  });
+});
+
+// 스냅샷
+exports[`will check the matchers and pass 1`] = `
+Object {
+  "createdAt": Any<Date>,
+  "id": Any<Number>,
+  "name": "LeBron James",
+}
+`;
+```
+
+## ES6 class mocks
+
+### Automatic mock
+
+jest.mock('./sound-player')을 호출하는 것은 클래스 생성자와 모든 메서드 호출을 감시하는데 사용할 수 있는 유용한 "자동 모의"를 반환합니다. ES6 클래스를 모의 생성자로 교체하고, 모든 메서드를 항상 undefined를 반환하는 모의 함수로 교체합니다. 메서드 호출은 `theAutomaticMock.mock.instances[index].methodName.mock.calls`에 저장됩니다.
+
+클래스에 화살표 함수를 사용한다면, 그것들은 모의의 일부가 되지 않음을 주의하세요. 그 이유는 화살표 함수는 객체의 프로토타입에 존재하지 않고, 단지 함수에 대한 참조를 보유하는 속성(property)들일 뿐이기 때문입니다.
+
+### Manual mock
+
+`__mocks__` 폴더에 모의 구현을 저장하여 수동 모의를 생성하세요. 이를 통해 구현을 지정할 수 있고, 테스트 파일 전반에 걸쳐 사용될 수 있습니다.
+
+### Calling jest.mock() with the module factory parameter
+
+생성자 함수를 모의하기 위해, 모듈 팩토리는 생성자 함수를 반환해야 합니다. 다른 말로, 모듈 팩토리는 함수를 반환하는 함수 - 고차 함수(HOF) 여야 합니다.
+팩토리 파라미터의 한계는 jest.mock() 호출이 파일의 최 상단으로 호이스팅 되기 때문에, 먼저 변수를 정의한 다음 팩토리에서 그것을 사용할 수 없다는 것입니다. 예외는 **mock** 이라는 단어로 시작하는 변수에 대해 만들어 집니다.
+
+```javascript
+import SoundPlayer from './sound-player';
+const mockPlaySoundFile = jest.fn(); // mock 이라는 단어로 시작하는 변수
+jest.mock('./sound-player', () => {
+  return jest.fn().mockImplementation(() => {
+    return {playSoundFile: mockPlaySoundFile};
+  });
+});
+```
+
+### Replacing the mock using mockImplementation() or mockImplementationOnce()
+
+단일 테스트나 모든 테스트에 대해 구현을 변경하기 위해 위의 모든 모의를 기존의 모의에서 mockImplementation()를 호출하여 교체할 수 있습니다.
+
+jest.mock 호출은 코드의 최 상단으로 호이스팅 됩니다. 나중에, 예를 들어 팩토리 파라미터를 사용하는 대신 기존 모의에 mockImplementation() (또는 mockImplementationOnce())를 호출하여 모의를 지정할 수 있습니다. 
+필요하다면, 테스트 사이에 모의를 변경하는 것 역시 가능합니다
+
+```javascript
+import SoundPlayer from './sound-player';
+import SoundPlayerConsumer from './sound-player-consumer';
+
+jest.mock('./sound-player');
+
+describe('When SoundPlayer throws an error', () => {
+  beforeAll(() => {
+    SoundPlayer.mockImplementation(() => {
+      return {
+        playSoundFile: () => {
+          throw new Error('Test error');
+        },
+      };
+    });
+  });
+
+  it('Should throw an error when calling playSomethingCool', () => {
+    const soundPlayerConsumer = new SoundPlayerConsumer();
+    expect(() => soundPlayerConsumer.playSomethingCool()).toThrow();
+  });
+});
+
+```
+
+## Configuration
 
 ### automock [boolean]
 
@@ -65,7 +708,7 @@ Default: undefined
 
 Jest가 커버리지 파일 결과물을 산출할 경로를 나타냅니다.
 
-### coveragePathIgnorePatterns [array<string>]
+### coveragePathIgnorePatterns [array\<string\>]
 
 Default: {"/node_modules/"}
 
@@ -79,7 +722,7 @@ Default: {"/node_modules/"}
 1. `vm.compieFunction`에 노드 버젼을 반드시 포함시켜야 합니다. (node 10.10에서 소개되었습니다.)
 2. Test들은 Node test 환경에서 돌아가야 합니다.(jsdom을 지원하려면 [jest-environment-jsdom-sixteen](https://www.npmjs.com/package/jest-environment-jsdom-sixteen)이 필요합니다)
 
-### coverageReporters [array<string>]
+### coverageReporters [array\<string\>]
 
 Default: ["json", "lcov", "text", "clover"]
 
@@ -167,7 +810,7 @@ Default: false
 
 더 이상 사용되지 않는 API를 호출하면 유용한 오류 메시지가 표시됩니다. 업그레이드 프로세스를 완화하는 데 유용합니다.
 
-### extraGlobals [array<string>]
+### extraGlobals [array\<string\>]
 
 Default: undefined
 
@@ -182,7 +825,7 @@ Default: undefined
 }
 ```
 
-### forceCoverageMatch [array<string>]
+### forceCoverageMatch [array\<string\>]
 
 Default: ['']
 
@@ -271,19 +914,19 @@ Default: 5
 
 `test.concurrent`를 사용할 때 동시에 실행할 수있는 테스트 수를 제한하는 숫자입니다. 이 제한을 초과하는 모든 테스트는 슬롯이 해제되면 큐에 대기하고 실행됩니다.
 
-### moduleDirectories [array<string>]
+### moduleDirectories [array\<string\>]
 
 Default: ["node_modules"]
 
 필요한 모듈 위치에서 재귀 적으로 검색 할 디렉토리 이름 배열입니다. 이 옵션을 설정하면 패키지에 대한 기본값을 덮어 씁니다. 패키지에 대한 node_modules를 계속 검색하려면 다른 옵션과 함께 패키지를 포함하십시오. `["node_modules", "bower_components"]`
 
-### moduleFileExtensions [array<string>]
+### moduleFileExtensions [array\<string\>]
 
 Default: ["js", "json", "jsx", "ts", "tsx", "node"]
 
 모듈이 사용하는 파일 확장자 배열. 파일 확장자를 지정하지 않고 모듈이 필요한 경우 Jest가 왼쪽에서 오른쪽으로 찾는 확장자입니다.
 
-### moduleNameMapper [object<string, string | array<string>>]
+### moduleNameMapper [object<string, string | array\<string\>>]
 
 Default: null
 
@@ -308,13 +951,13 @@ Default: null
 
 매핑이 정의 된 순서가 중요합니다. 패턴은 하나가 맞을 때까지 하나씩 점검됩니다. 가장 구체적인 규칙이 먼저 나열되어야합니다. 이는 모듈 이름 배열에도 적용됩니다.
 
-### modulePathIgnorePatterns [array<string>]
+### modulePathIgnorePatterns [array\<string\>]
 
 Default: []
 
 해당 경로가 모듈 로더에 의해 '보이는' 것으로 간주되기 전에 모든 모듈 경로와 일치하는 정규 표현식 패턴 문자열 배열입니다. 주어진 모듈의 경로가 패턴 중 하나와 일치하면 테스트 환경에서 `require()` 가능하지 않습니다.
 
-### modulePaths [array<string>]
+### modulePaths [array\<string\>]
 
 Default: []
 
@@ -367,7 +1010,7 @@ Default: 'prettier'
 
 인라인 snapshots을 업데이트 하기 위한 prettier 노드 모듈의 경로를 설정합니다.
 
-### projects [array<string | ProjectConfig>]
+### projects [array\<string | ProjectConfig\>]
 
 Default: undefined
 
@@ -398,7 +1041,7 @@ Default: undefined
 }
 ```
 
-### reporters [array<moduleName | [moduleName, options]>]
+### reporters [array\<moduleName | [moduleName, options]\>]
 
 Default: undefined
 
@@ -496,9 +1139,9 @@ Default: Jest의 config 파일이나 package.json 또는 package.json이 없다�
 
 Jest가 테스트 및 모듈 내에서 스캔해야하는 루트 디렉토리. Jest 설정을 package.json 안에 넣고 루트 디렉토리를 리포지토리의 루트로 설정하려는 경우이 구성 매개 변수의 값은 기본적으로 package.json의 디렉토리입니다.
 
-### roots [array<string>]
+### roots [array\<string\>]
 
-Default: ["<rootDir>"]
+Default: ["\<rootDir\>"]
 
 Jest가 파일을 검색 할 때 사용해야하는 디렉토리의 경로 목록입니다.
 
@@ -580,7 +1223,7 @@ module.exports = {
 };
 ```
 
-### snapshotSerializers [array<string>]
+### snapshotSerializers [array\<string\>]
 
 Default: []
 
@@ -613,23 +1256,23 @@ Default: {}
 
 testEnvironment에 전달 될 테스트 환경 옵션. 관련 옵션은 환경에 따라 다릅니다. 예를 들어 `{userAgent : "Agent/007"}`과 같이 jsdom에 제공된 옵션을 무시할 수 있습니다.
 
-### testMatch [array<string>]
+### testMatch [array\<string\>]
 
 (default: `[ "**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)" ]`)
 
 Jest가 테스트 파일을 탐지하기 위해 사용하는 glob 패턴. 기본적으로 `__tests__` 폴더 내의 .js, .jsx, .ts 및 .tsx 파일과 접미사가 .test 또는 .spec 인 파일 (예 : Component.test.js 또는 Component.spec.js)을 찾습니다. test.js 또는 spec.js라는 파일도 찾을 수 있습니다.
 
-### testPathIgnorePatterns [array<string>]
+### testPathIgnorePatterns [array\<string\>]
 
 Default: ["/node_modules/"]
 
 테스트를 실행하기 전에 모든 테스트 경로와 일치하는 정규 표현식 패턴 문자열의 배열입니다. 테스트 경로가 패턴 중 하나와 일치하면 건너 뜁니다.
 
-### testRegex [string | array<string>]
+### testRegex [string | array\<string\>]
 
 Default: `(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$`
 
-Jest가 테스트 파일을 탐지하는 데 사용하는 패턴입니다. 기본적으로 `__tests__` 폴더 내의 .js, .jsx, .ts 및 .tsx 파일과 접미사가 .test 또는 .spec 인 파일 (예 : Component.test.js 또는 Component.spec.js)을 찾습니다. . test.js 또는 spec.js라는 파일도 찾을 수 있습니다. testMatch [array <string>]도 참조하십시오. 그러나 두 옵션을 모두 지정할 수는 없습니다.
+Jest가 테스트 파일을 탐지하는 데 사용하는 패턴입니다. 기본적으로 `__tests__` 폴더 내의 .js, .jsx, .ts 및 .tsx 파일과 접미사가 .test 또는 .spec 인 파일 (예 : Component.test.js 또는 Component.spec.js)을 찾습니다. . test.js 또는 spec.js라는 파일도 찾을 수 있습니다. testMatch [array \<string\>]도 참조하십시오. 그러나 두 옵션을 모두 지정할 수는 없습니다.
 
 다음은 기본 정규식의 시각화입니다.
 
@@ -741,7 +1384,7 @@ Default timeout of a test in milliseconds.
 
 ### testURL [string]
 
-Default: http://localhost
+Default: "http://localhost"
 
 이 옵션은 jsdom 환경의 URL을 설정합니다. location.href와 같은 속성에 반영됩니다.
 
@@ -759,13 +1402,13 @@ Default: undefined
 
 `{filePattern : [ 'path-to-transformer', {options}]}`와 같은 transformer에 구성을 전달할 수 있습니다. 예를 들어, 기본이 아닌 동작에 대해 babel-jest를 구성하려면 `{ "\\.js$": ['babel-jest', {rootMode : "upward"}]}` 처럼 설정할 수 있습니다.
 
-### transformIgnorePatterns [array<string>]
+### transformIgnorePatterns [array\<string\>]
 
 Default: ["/node_modules/"]
 
 변환하기 전에 모든 소스 파일 경로와 일치하는 정규 표현식 패턴 문자열의 배열입니다. 테스트 경로가 패턴과 일치하면 변환되지 않습니다.
 
-### unmockedModulePathPatterns [array<string>]
+### unmockedModulePathPatterns [array\<string\>]
 
 Default: []
 
@@ -780,13 +1423,13 @@ Default: false
 
 실행 중에 각 개별 테스트를 보고 해야하는지 여부를 나타냅니다. 실행 후에도 모든 오류가 여전히 맨 아래에 표시됩니다. 테스트 파일이 하나만 있으면 기본값은 true입니다.
 
-### watchPathIgnorePatterns [array<string>]
+### watchPathIgnorePatterns [array\<string\>]
 
 Default: []
 
 감시 모드에서 테스트를 다시 실행하기 전에 모든 소스 파일 경로와 일치하는 RegExp 패턴 배열입니다. 파일 경로가 패턴 중 하나와 일치하면 업데이트 될 때 테스트 재실행이 트리거되지 않습니다.
 
-### watchPlugins [array<string | [string, Object]>]
+### watchPlugins [array\<string | [string, Object]\>]
 
 Default: []
 
@@ -795,3 +1438,8 @@ Default: []
 ### // [string]
 
 이 옵션은 package.json에서 주석을 허용합니다. package.json 어딘가에 주석 텍스트를이 키의 값으로 포함하십시오.
+
+## reference
+
+- [https://jestjs.io/docs/en/getting-started](https://jestjs.io/docs/en/getting-started)
+- [https://mulder21c.github.io/jest/docs/en/next/getting-started](https://mulder21c.github.io/jest/docs/en/next/getting-started)

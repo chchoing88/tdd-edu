@@ -1,6 +1,6 @@
 const Money = require("./Money");
 
-class Dollar extends Money {
+class Dollar extends Money.Money {
   constructor(amount) {
     super(amount);
   }
@@ -10,4 +10,4 @@ class Dollar extends Money {
   }
 }
 
-module.exports = Dollar;
+exports.Dollar = Dollar;

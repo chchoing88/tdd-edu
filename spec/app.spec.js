@@ -1,6 +1,6 @@
-const Dollar = require("../src/Dollar");
-const Franc = require("../src/Franc");
-const Money = require("../src/Money");
+const { Dollar } = require("../src/Dollar");
+const { Franc } = require("../src/Franc");
+const { Money } = require("../src/Money");
 
 describe("Dollar 객체", function () {
   // it("Dollar 객체에 곱하기 기능을 둔다.", function () {
@@ -12,8 +12,7 @@ describe("Dollar 객체", function () {
 
   it("times 메서드로 Dollar 객체에 곱하기 기능을 둔다.", function () {
     //
-    // const five = new Dollar(5);
-    const five = Money.dallor(5);
+    const five = new Dollar(5);
     // 삼각측량을 이용했다면 테스트를 통과시키기 위한 상수값 설정으로는 통과시키기 어려웠을 것이다.
     // let product = five.times(2);
     // Dollar의 amount 인스턴스 변수를 사용하는 코드를 Dollar 자신만 쓰게 만들어서 private로 만들자.
@@ -50,5 +49,20 @@ describe("Money 객체", function () {
   it("equals 메서드로 같은 양의 달러는 참이 되어야 한다.", function () {
     // 같은 통화 화폐가 아니면 false 이어야 한다.
     expect(new Franc(5).equals(new Dollar(5))).toBeFalse();
+  });
+
+  it("팩토리 생성자로 Dollar 객체를 생성 후 times 메서드 확인", function () {
+    const five = Money.dollar(5);
+
+    expect(Money.dollar(10)).toEqual(five.times(2));
+    expect(Money.dollar(15)).toEqual(five.times(3));
+  });
+
+  it("팩토리 생성자로 Dollar 객체를 생성 후 equals 메서드 확인", function () {
+    expect(Money.dollar(5).equals(Money.dollar(5))).toBeTrue();
+    expect(Money.dollar(5).equals(Money.dollar(6))).toBeFalse();
+    expect(Money.franc(5).equals(Money.franc(5))).toBeTrue();
+    expect(Money.franc(5).equals(Money.franc(6))).toBeFalse();
+    expect(Money.franc(5).equals(Money.dollar(5))).toBeFalse();
   });
 });
