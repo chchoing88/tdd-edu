@@ -1,17 +1,15 @@
-const Dollar = require("./Dollar");
-const Franc = require("./Franc");
-
 class Money {
-  constructor(amount) {
+  constructor(amount, currency) {
     this._amount = amount || 0;
+    this._currency = currency;
   }
 
   static dollar(amount) {
-    return new Dollar.Dollar(amount);
+    return new Dollar.Dollar(amount, "USD");
   }
 
   static franc(amount) {
-    return new Franc.Franc(amount);
+    return new Franc.Franc(amount, "CHF");
   }
 
   equals(objMoney) {
@@ -24,6 +22,14 @@ class Money {
   }
 
   times(multiplier) {}
+
+  currency() {
+    return this._currency;
+  }
 }
 
 exports.Money = Money;
+
+// Node.js 의 순환 의존성...
+const Dollar = require("./Dollar");
+const Franc = require("./Franc");
