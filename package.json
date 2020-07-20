@@ -10,5 +10,6 @@
   "license": "MIT",
   "devDependencies": {
     "jasmine": "^3.5.0"
-  }
+  },
+  "type": "module"
 }
